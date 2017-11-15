@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="./angular/angular.js"></script>
+        <!--引入jquery文件-->
+        <script type="text/javascript" src="jquery-1.12.3.min.js"></script>
+        <style type="text/css">
+            .red{
+                color:red;
+            }
+            .green{
+                color:green;
+            }
+        </style>
+    </head>
+    <body ng-app="myApp">
+        <div ng-controller="myCon">
+            用户名：<input type="text" name="name" ng-model="name"/><br/>
+            密码：<input type="text" name="pwd" ng-model="pwd"/><br/>
+            <span ng-class="{true:'green',false:'red'}[color]" ng-show="isshow">{{msg}}</span></br>
+            <input type="button" value="登录" ng-click="login();"/>
+        </div>
+    </body>
+</html>
+<script>
+    //JSONP方式提交的结构
+//    繁写
+//    $http({
+//        method:"jsonP",
+//        url:"提交地址",
+//        params:"提交参数json数据结构"
+//    }).then(function(data){
+//        //成功条件下执行的
+//    }).catch(function(data){
+//        //失败的情况
+//    })
+//    jsonp提交后，接收是get方式接收
+   
+    var app = angular.module("myApp", []);
+    app.controller("myCon",["$scope","$http","$sce",function($scope,$http,$sce){
+            $scope.name = "";
+            $scope.pwd = "";
+            $scope.color = false;//提示信息的颜色
+            $scope.msg = "";
+            $scope.isshow = false;
+            //点击事件
+            $scope.login = function(){
+                $scope.isshow = false;
+                var name = $scope.name;
+                var pwd = $scope.pwd;
+                //跨域的地址，需要用sce进行转义
+                var url = $sce.trustAsResourceUrl("http://localhost/login.php");//相对地址
+                var data = {name:name,pwd:pwd};
+                $http({
+                    method:"jsonP",
+                    url:url,
+                    params:data
+                }).then(function(data){
+                    var result = data.data;
+                    console.log(result);
+                    //根据状态调整字体的颜色
+                    if(result.status == true){
+                        $scope.color = true;
+                    }else{
+                        $scope.color = false;
+                    }
+                    //调整字体信息
+                    $scope.msg = result.msg;
+                    $scope.isshow = true;
+                    
+                });
+    
+            }
+    }]);
+</script>
